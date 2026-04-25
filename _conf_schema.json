@@ -1,54 +1,38 @@
 {
-  "admin_ids": {
-    "description": "额外允许管理本插件的管理员账号 ID 列表",
-    "type": "list",
-    "hint": "群管理员默认也有权限；这里用于补充平台无法识别时的管理员 ID，例如 [\"12345678\"]",
-    "default": []
-  },
-  "llm_provider_id": {
-    "description": "用于 DDL 抽取的模型 Provider ID",
-    "type": "string",
-    "hint": "为空时尝试根据当前会话自动推断；若定时抽取失败，建议显式填写",
-    "default": ""
-  },
-  "timezone": {
-    "description": "DDL 时间解析与提醒计算使用的时区",
-    "type": "string",
-    "hint": "例如 Asia/Shanghai",
-    "default": "Asia/Shanghai"
-  },
-  "extract_interval_minutes": {
-    "description": "自动抽取 DDL 的时间间隔（分钟）",
-    "type": "int",
-    "hint": "每隔多长时间把新消息交给 AI 整理并提取 DDL",
-    "default": 30
-  },
-  "max_messages_per_extract": {
-    "description": "单次抽取最多送入模型的消息条数",
-    "type": "int",
-    "hint": "消息很多时会分批处理",
-    "default": 200
-  },
-  "default_remind_before_minutes": {
-    "description": "默认提前多少分钟提醒",
-    "type": "int",
-    "hint": "当某类 DDL 没有单独提醒规则时，统一按这个默认值提醒",
-    "default": 60
-  },
-  "auto_remind_enabled": {
-    "description": "是否自动发送 DDL 提醒",
+  "enabled": {
+    "description": "Enable this demo plugin.",
     "type": "bool",
     "default": true
   },
-  "send_extract_summary_back_to_group": {
-    "description": "抽取完成后是否自动把摘要发回群聊",
-    "type": "bool",
-    "default": false
+  "timezone": {
+    "description": "Timezone name used by the plugin.",
+    "type": "string",
+    "default": "Asia/Shanghai"
   },
-  "tick_interval_seconds": {
-    "description": "后台轮询间隔（秒）",
+  "remind_before_minutes": {
+    "description": "Example integer config item.",
     "type": "int",
-    "hint": "用于扫描新消息与检查提醒，不建议设置过小",
-    "default": 30
+    "default": 60
+  },
+  "admin_ids": {
+    "description": "Example list config item.",
+    "type": "list",
+    "default": []
+  },
+  "debug": {
+    "description": "Nested object config example.",
+    "type": "object",
+    "items": {
+      "log_config_on_start": {
+        "description": "Log the parsed config during startup.",
+        "type": "bool",
+        "default": true
+      },
+      "note": {
+        "description": "Optional note for debugging.",
+        "type": "string",
+        "default": ""
+      }
+    }
   }
 }

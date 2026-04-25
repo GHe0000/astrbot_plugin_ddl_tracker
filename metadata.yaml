@@ -1,6 +1,6 @@
 name: ddl_tracker
 display_name: DDL Tracker
-desc: 群聊 DDL 记录、抽取与提醒插件
-version: v1.2.0
+desc: Minimal config loading example plugin
+version: v1.3.0
 author: Codex
 repo: ""

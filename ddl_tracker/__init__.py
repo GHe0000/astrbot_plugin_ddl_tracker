@@ -1,4 +1,4 @@
-"""DDL Tracker 插件包导出。"""
+"""ddl_tracker package exports."""
 
 from .plugin import DDLTrackerPlugin
 
