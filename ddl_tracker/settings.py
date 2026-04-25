@@ -14,9 +14,9 @@ from .utils import safe_int
 class PluginSettings:
     """统一封装插件配置读取。"""
 
-    def __init__(self, config: AstrBotConfig):
+    def __init__(self, config: AstrBotConfig | dict | None):
         """保存 AstrBot 注入的原始配置对象。"""
-        self.config = config
+        self.config = config or {}
 
     def plugin_name(self) -> str:
         """返回插件内部使用的固定名称。"""

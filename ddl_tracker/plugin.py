@@ -38,7 +38,7 @@ except Exception:
 class DDLTrackerPlugin(Star):
     """DDL Tracker 的 AstrBot 插件实现。"""
 
-    def __init__(self, context: Context, config: AstrBotConfig):
+    def __init__(self, context: Context, config: AstrBotConfig | dict | None = None):
         """初始化配置、数据库和后台循环依赖。"""
         super().__init__(context)
         self.settings = PluginSettings(config)
@@ -679,5 +679,5 @@ class DDLTrackerPlugin(Star):
     def _get_data_dir(self) -> Path:
         """返回插件的数据目录。"""
         if get_astrbot_data_path:
-            return get_astrbot_data_path() / "plugin_data" / self.settings.plugin_name()
+            return Path(get_astrbot_data_path()) / "plugin_data" / self.settings.plugin_name()
         return Path("data") / "plugin_data" / self.settings.plugin_name()
