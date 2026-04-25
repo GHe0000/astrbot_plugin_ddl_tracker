@@ -1,59 +1,54 @@
 {
-  "super_admin_ids": {
-    "description": "可管理本插件的超级管理员 ID 列表",
+  "admin_ids": {
+    "description": "额外允许管理本插件的管理员账号 ID 列表",
     "type": "list",
-    "hint": "填写发送者 ID 字符串列表，例如 [\"12345678\", \"87654321\"]",
+    "hint": "群管理员默认也有权限；这里用于补充平台无法识别时的管理员 ID，例如 [\"12345678\"]",
     "default": []
   },
-  "summary_interval_minutes": {
-    "description": "固定间隔总结（分钟）",
-    "type": "int",
-    "hint": "大于 0 时启用固定间隔总结；设为 0 表示关闭",
-    "default": 60
-  },
-  "daily_summary_times": {
-    "description": "每日固定总结时刻列表",
-    "type": "list",
-    "hint": "例如 [\"09:00\", \"18:00\"]，24 小时制；留空表示关闭",
-    "default": []
-  },
-  "remind_before_minutes": {
-    "description": "距离截止时间前多少分钟提醒",
-    "type": "int",
-    "hint": "例如 30 表示提前 30 分钟提醒",
-    "default": 30
-  },
-  "summary_lookback_minutes": {
-    "description": "每次总结回看最近多少分钟的消息",
-    "type": "int",
-    "hint": "用于给 AI 做阶段性总结与任务提取",
-    "default": 120
-  },
-  "enable_interval_summary": {
-    "description": "是否启用固定间隔总结",
-    "type": "bool",
-    "default": true
-  },
-  "enable_daily_summary": {
-    "description": "是否启用每日固定时刻总结",
-    "type": "bool",
-    "default": true
-  },
-  "summary_model_provider_id": {
-    "description": "用于总结/提取任务的模型 Provider ID",
+  "llm_provider_id": {
+    "description": "用于 DDL 抽取的模型 Provider ID",
     "type": "string",
-    "hint": "为空时，尝试使用当前会话模型；若定时任务无法推断，建议明确填写",
+    "hint": "为空时尝试根据当前会话自动推断；若定时抽取失败，建议显式填写",
     "default": ""
   },
-  "max_messages_per_summary": {
-    "description": "单次总结最多送入模型的消息条数",
+  "timezone": {
+    "description": "DDL 时间解析与提醒计算使用的时区",
+    "type": "string",
+    "hint": "例如 Asia/Shanghai",
+    "default": "Asia/Shanghai"
+  },
+  "extract_interval_minutes": {
+    "description": "自动抽取 DDL 的时间间隔（分钟）",
     "type": "int",
+    "hint": "每隔多长时间把新消息交给 AI 整理并提取 DDL",
+    "default": 30
+  },
+  "max_messages_per_extract": {
+    "description": "单次抽取最多送入模型的消息条数",
+    "type": "int",
+    "hint": "消息很多时会分批处理",
     "default": 200
   },
+  "default_remind_before_minutes": {
+    "description": "默认提前多少分钟提醒",
+    "type": "int",
+    "hint": "当某类 DDL 没有单独提醒规则时，统一按这个默认值提醒",
+    "default": 60
+  },
   "auto_remind_enabled": {
-    "description": "是否开启截止前自动提醒",
+    "description": "是否自动发送 DDL 提醒",
     "type": "bool",
     "default": true
+  },
+  "send_extract_summary_back_to_group": {
+    "description": "抽取完成后是否自动把摘要发回群聊",
+    "type": "bool",
+    "default": false
+  },
+  "tick_interval_seconds": {
+    "description": "后台轮询间隔（秒）",
+    "type": "int",
+    "hint": "用于扫描新消息与检查提醒，不建议设置过小",
+    "default": 30
   }
 }
-
