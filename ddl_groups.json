@@ -1,0 +1,334 @@
+{
+  "1043947576": {
+    "enabled": true,
+    "messages": [
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_on",
+        "message_ts": 1777129068
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "考试 2026-4-26-10:00",
+        "message_ts": 1777129090
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "高数作业 2026-4-27",
+        "message_ts": 1777129105
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_now",
+        "message_ts": 1777129112
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_now",
+        "message_ts": 1777129516
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "一小时后物理作业截止",
+        "message_ts": 1777129754
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_now",
+        "message_ts": 1777129762
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_now",
+        "message_ts": 1777130143
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "五天后实验报告截止",
+        "message_ts": 1777130865
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_extract 5",
+        "message_ts": 1777130882
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_status",
+        "message_ts": 1777130927
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_extract",
+        "message_ts": 1777131360
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_status",
+        "message_ts": 1777131369
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_status",
+        "message_ts": 1777132108
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_nearest 5",
+        "message_ts": 1777132117
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_nearest 6",
+        "message_ts": 1777132136
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "？现在最近的 DDL 有什么？",
+        "message_ts": 1777134216
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "现在最近的 DDL 有什么？",
+        "message_ts": 1777134227
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "考试在前一天的 22:00 提醒",
+        "message_ts": 1777134336
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "2026-5-5 电动力学",
+        "message_ts": 1777134364
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_extract",
+        "message_ts": 1777134382
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "现在有多少 DDL？",
+        "message_ts": 1777134446
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "现在最近的 DDL 有什么？",
+        "message_ts": 1777134456
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "现在有多少 DDL？",
+        "message_ts": 1777134464
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_sattus",
+        "message_ts": 1777134481
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "ddl_status",
+        "message_ts": 1777134492
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "现在最近的 DDL 有什么？",
+        "message_ts": 1777176720
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "整理最近一段时间的群消息并提取 DDL",
+        "message_ts": 1777177285
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "请，看看你添加了什么 DDL？",
+        "message_ts": 1777177310
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "你创建提醒了么？",
+        "message_ts": 1777177359
+      },
+      {
+        "sender_name": "σ",
+        "sender_id": "3249456486",
+        "message_text": "两个实验报告修改为提前一天提醒",
+        "message_ts": 1777177415
+      }
+    ],
+    "unified_msg_origin": "Orine:GroupMessage:1043947576",
+    "ddl_items": [
+      {
+        "message_index": 3,
+        "type": "作业",
+        "title": "高数作业",
+        "deadline_text": "2026-04-27",
+        "normalized_deadline": "2026-04-27 23:59",
+        "source_text": "高数作业 2026-4-27",
+        "fingerprint": "07fb1cd87bdec0b46df56e7acb715e1f9724c57a",
+        "updated_at": 1777134382,
+        "created_at": 1777130876,
+        "deadline_ts": 1777305540,
+        "last_reminded_at": 0,
+        "last_reminded_deadline_ts": 0,
+        "last_reminded_key": "",
+        "future_task_name": "高数作业提醒",
+        "future_task_remind_key": "default:60",
+        "future_task_remind_ts": 1777301940,
+        "future_task_recorded_at": 1777177372
+      },
+      {
+        "message_index": 8,
+        "type": "作业",
+        "title": "实验报告",
+        "deadline_text": "五天后截止",
+        "normalized_deadline": "2026-04-30 23:27",
+        "source_text": "五天后实验报告截止",
+        "fingerprint": "22091a809fd2b0fcb63da05ecc17d6bef36fb4d4",
+        "updated_at": 1777130876,
+        "created_at": 1777130876,
+        "deadline_ts": 1777562820,
+        "future_task_name": "实验报告提醒（作业）",
+        "future_task_remind_key": "default:60",
+        "future_task_remind_ts": 1777559220,
+        "future_task_recorded_at": 1777177372
+      },
+      {
+        "message_index": 4,
+        "type": "作业",
+        "title": "实验报告",
+        "deadline_text": "五天后实验报告截止",
+        "normalized_deadline": "2026-04-30 23:27:45",
+        "source_text": "五天后实验报告截止",
+        "fingerprint": "242ae04133e192969c3f5841b2f72e83a755ba88",
+        "updated_at": 1777131360,
+        "created_at": 1777130882,
+        "deadline_ts": 1777562865,
+        "future_task_name": "",
+        "future_task_remind_key": "",
+        "future_task_remind_ts": 0,
+        "future_task_recorded_at": 0
+      },
+      {
+        "message_index": 9,
+        "type": "实验",
+        "title": "实验报告",
+        "deadline_text": "五天后实验报告截止",
+        "normalized_deadline": "2026-04-30 23:27:45",
+        "source_text": "五天后实验报告截止",
+        "deadline_ts": 1777562865,
+        "fingerprint": "b85fd561b389eb8f7091e9080e12bc81575eeb62",
+        "updated_at": 1777134382,
+        "created_at": 1777134382,
+        "last_reminded_at": 0,
+        "last_reminded_deadline_ts": 0,
+        "last_reminded_key": "",
+        "future_task_name": "实验报告提醒（实验）",
+        "future_task_remind_key": "default:60",
+        "future_task_remind_ts": 1777559265,
+        "future_task_recorded_at": 1777177372
+      },
+      {
+        "message_index": 1,
+        "type": "作业",
+        "title": "整理最近一段时间的群消息并提取 DDL",
+        "deadline_text": "未指定",
+        "normalized_deadline": "",
+        "source_text": "整理最近一段时间的群消息并提取 DDL",
+        "fingerprint": "f9cd27d9538ae3b167a1c2e773a97ab27386566e",
+        "deadline_ts": 0,
+        "updated_at": 1777177289,
+        "created_at": 1777177289,
+        "last_reminded_at": 0,
+        "last_reminded_deadline_ts": 0,
+        "last_reminded_key": "",
+        "future_task_name": "",
+        "future_task_remind_key": "",
+        "future_task_remind_ts": 0,
+        "future_task_recorded_at": 0
+      }
+    ],
+    "last_extract_at": 1777177289,
+    "last_extract_source": "tool",
+    "last_extract_result": {
+      "provider_id": "deepseek/deepseek-chat",
+      "message_count": 1,
+      "extracted_count": 1,
+      "added_count": 1,
+      "updated_count": 0,
+      "parsed_result": {
+        "summary": "群里提到了 1 条明确的 DDL。",
+        "items": [
+          {
+            "message_index": 1,
+            "type": "作业",
+            "title": "整理最近一段时间的群消息并提取 DDL",
+            "deadline_text": "未指定",
+            "normalized_deadline": null,
+            "source_text": "整理最近一段时间的群消息并提取 DDL"
+          }
+        ]
+      },
+      "raw_result": "{\n  \"summary\": \"群里提到了 1 条明确的 DDL。\",\n  \"items\": [\n    {\n      \"message_index\": 1,\n      \"type\": \"作业\",\n      \"title\": \"整理最近一段时间的群消息并提取 DDL\",\n      \"deadline_text\": \"未指定\",\n      \"normalized_deadline\": null,\n      \"source_text\": \"整理最近一段时间的群消息并提取 DDL\"\n    }\n  ]\n}"
+    },
+    "reminder_rules": {
+      "考试": {
+        "type_keyword": "考试",
+        "match_text": "考试",
+        "mode": "relative",
+        "offset_minutes": 1440,
+        "rule_text": "考试提前1天提醒",
+        "updated_at": 1777134338
+      },
+      "两个实验报告修改为": {
+        "type_keyword": "两个实验报告修改为",
+        "match_text": "两个实验报告修改为",
+        "mode": "relative",
+        "offset_minutes": 1440,
+        "rule_text": "两个实验报告修改为提前一天提醒",
+        "updated_at": 1777177415
+      },
+      "作业": {
+        "type_keyword": "作业",
+        "match_text": "作业",
+        "mode": "relative",
+        "offset_minutes": 1440,
+        "rule_text": "作业提前1天提醒",
+        "updated_at": 1777177417
+      }
+    }
+  }
+}

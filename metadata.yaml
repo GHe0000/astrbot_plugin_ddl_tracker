@@ -1,6 +1,6 @@
 name: ddl_tracker
-display_name: DDL Tracker
-desc: Minimal config loading example plugin
-version: v1.3.0
+display_name: DDL Tracker Demo
+desc: 最小 DDL 调试插件
+version: v0.8.0
 author: Codex
 repo: ""

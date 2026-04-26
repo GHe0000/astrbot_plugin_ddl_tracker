@@ -1,38 +1,39 @@
 {
-  "enabled": {
-    "description": "Enable this demo plugin.",
+  "llm_provider_id": {
+    "description": "DDL 提取使用的模型 Provider ID",
+    "type": "string",
+    "default": "",
+    "hint": "留空时默认使用当前会话绑定的模型；填写后 /ddl_extract 会固定使用这个模型。"
+  },
+  "auto_extract_enabled": {
+    "description": "是否启用自动整理",
     "type": "bool",
     "default": true
   },
-  "timezone": {
-    "description": "Timezone name used by the plugin.",
-    "type": "string",
-    "default": "Asia/Shanghai"
+  "auto_extract_interval_minutes": {
+    "description": "自动整理周期（分钟）",
+    "type": "int",
+    "default": 30,
+    "hint": "自动整理会按这个周期提取最近一段时间的新消息；/ddl_extract 不带参数时也默认使用这个分钟数。"
+  },
+  "auto_remind_enabled": {
+    "description": "是否启用 DDL 提醒计划",
+    "type": "bool",
+    "default": true,
+    "hint": "开启后，插件会计算每条 DDL 的提醒时间，并提供给主 Agent 使用官方 future_task 工具创建任务。"
   },
   "remind_before_minutes": {
-    "description": "Example integer config item.",
+    "description": "提前多少分钟提醒",
     "type": "int",
-    "default": 60
+    "default": 60,
+    "hint": "当某条 DDL 没有命中特定类别规则时，会按这个默认提前时间生成 future_task 提醒计划。"
   },
-  "admin_ids": {
-    "description": "Example list config item.",
-    "type": "list",
-    "default": []
-  },
-  "debug": {
-    "description": "Nested object config example.",
-    "type": "object",
-    "items": {
-      "log_config_on_start": {
-        "description": "Log the parsed config during startup.",
-        "type": "bool",
-        "default": true
-      },
-      "note": {
-        "description": "Optional note for debugging.",
-        "type": "string",
-        "default": ""
-      }
-    }
+  "extract_prompt": {
+    "description": "DDL 提取提示词",
+    "type": "text",
+    "default": "你是一个负责提取群聊中 DDL 的助手。\n请从群消息里识别明确提到的作业、考试、实验、报告、报名、提交截止等事项。\n只输出 JSON，不要输出解释，不要输出 Markdown 代码块。\n输出必须是一个对象，包含 summary 和 items 两个字段。\nitems 是数组；每个元素包含：message_index、type、title、deadline_text、normalized_deadline、source_text。\n如果没有明确 DDL，请返回 {\"summary\":\"未识别到明确 DDL\",\"items\":[]}。\n不要编造不存在的信息，deadline_text 必须直接基于原消息。\n要特别识别相对时间表达，例如“一小时后截止”“今晚 11 点前”“一周内提交”“下周一前”。\n如果消息里出现相对时间，请优先根据该条消息前面的 ts/time 字段来解析。\n如果能推算出明确时间，请填写 normalized_deadline；不能精确到分钟时，也尽量给出最合理的截止时间文本。",
+    "hint": "这里填写的是基础提示词；代码会自动在后面补充当前时间、示例和待提取消息。",
+    "editor_mode": true,
+    "editor_language": "markdown"
   }
 }
