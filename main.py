@@ -18,8 +18,8 @@ from commands import CommandsMixin
 
 @register(
     "ddl_tracker",
-    "Codex",
-    "单文件 DDL 调试插件",
+    "Guotao He",
+    "DDL Tracker",
     "0.8.0",
 )
 class DDLTrackerPlugin(
