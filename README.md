@@ -9,7 +9,7 @@
 - **消息录制** — 开启后自动记录群聊文本消息（上限 500 条/群）
 - **AI 提取 DDL** — 定时/手动将最近消息发给 LLM，提取作业、考试、实验、报告等 DDL
 - **分类提醒规则** — 支持自然语言设置规则，如"作业提前1天提醒""考试前一天晚上22点提醒"
-- **官方提醒集成** — 配合主 Agent 的 `future_task` 工具创建定时提醒任务
+- **官方提醒集成** — 后台扫描到新 DDL 后直接调用 AstrBot `cron_manager` 创建官方 `future_task` 提醒
 - **查询命令** — 查看群状态（`/ddl_status`）和最近的 DDL（`/ddl_nearest`）
 
 ### 支持的命令
@@ -52,7 +52,7 @@ ddl_tracker/
 ├── commands.py          # CommandsMixin：命令处理器
 ├── llm_tools.py         # LLMToolsMixin：7 个 LLM Tool
 ├── _conf_schema.json    # 配置项 schema
-├── ddl_groups.json      # 持久化状态（自动生成）
+├── ddl_groups.example.json # 空状态示例
 ├── metadata.yaml        # 插件元数据
 └── skills/ddl-tracker/
     └── SKILL.md         # Agent Skill 指引
@@ -74,7 +74,7 @@ ddl_tracker/
           解析 JSON ──► 合并去重 ──► 持久化 DDL 列表
                    │
                    ▼
-    计算提醒时间（匹配提醒规则）──► 主 Agent 创建 future_task
+    计算提醒时间（匹配提醒规则）──► 后台自动创建官方 future_task
 ```
 
 ---
@@ -130,6 +130,7 @@ ddl_tracker/
 | `auto_extract_enabled` | bool | true | 是否启用自动整理 |
 | `auto_extract_interval_minutes` | int | 30 | 自动整理周期（分钟） |
 | `auto_remind_enabled` | bool | true | 是否启用 DDL 提醒计划 |
+| `auto_create_future_tasks` | bool | true | 是否在后台扫描/规则变更后直接创建官方 future_task |
 | `remind_before_minutes` | int | 60 | 默认提前多少分钟提醒（没有匹配到分类规则时使用） |
 | `extract_prompt` | text | (内置) | DDL 提取提示词，可自定义 |
 
@@ -159,10 +160,12 @@ ddl_tracker/
    ```
    或者让主 Agent 调用 `ddl_set_type_reminder` tool 设置。
 
-5. **创建提醒任务** — 对主 Agent 说：「帮我创建 DDL 提醒」，Agent 会：
-   - 调用 `ddl_get_pending_future_tasks` 获取待创建任务
-   - 调用 AstrBot 官方 `future_task` 逐条创建
-   - 调用 `ddl_mark_future_task_created` 标记已完成
+5. **创建提醒任务** — 默认开启 `auto_create_future_tasks` 后，插件会在后台自动整理扫描到新 DDL 或提醒规则变化时：
+   - 计算每条 DDL 的提醒时间
+   - 直接调用 AstrBot `cron_manager.add_active_job` 创建一次性官方 future_task
+   - 将官方 `job_id`、任务名、提醒规则键回写到 `ddl_groups.json`
+
+   如果运行环境没有 `cron_manager`，仍可由主 Agent 读取 `pending_future_tasks[].future_task_arguments` 后调用官方 `future_task` 工具创建。
 
 6. **查看状态**：
    ```
@@ -190,7 +193,7 @@ ddl_tracker/
 
 ### 持久化数据
 
-插件状态保存在 `ddl_groups.json` 文件中，结构如下：
+插件状态运行时保存在 `ddl_groups.json` 文件中，该文件会自动生成并已加入 `.gitignore`，不要提交真实群聊数据。仓库仅保留 `ddl_groups.example.json` 作为空状态示例。结构如下：
 
 ```json
 {
@@ -209,7 +212,7 @@ ddl_tracker/
 
 ## 项目信息
 
-- **作者**: Codex
-- **版本**: v0.8.0
-- **仓库**: (待填写)
+- **作者**: GuotaoHe
+- **版本**: v0.8.4
+- **仓库**: https://github.com/GHe0000/astrbot_plugin_ddl_tracker
 - **协议**: 见 LICENSE 文件

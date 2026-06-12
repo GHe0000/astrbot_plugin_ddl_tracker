@@ -1,14 +1,13 @@
 import json
 from time import time
 
-from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.event import AstrMessageEvent
 
-from constants import MAX_MESSAGES_PER_GROUP
-from utils import safe_int, format_ts, format_remaining
+from .constants import MAX_MESSAGES_PER_GROUP
+from .utils import safe_int, format_ts, format_remaining
 
 
 class CommandsMixin:
-    @filter.command("ddl_on")
     async def ddl_on(self, event: AstrMessageEvent):
         group_id = self._get_group_id(event)
         if not group_id:
@@ -23,7 +22,6 @@ class CommandsMixin:
         logger.info("[ddl_tracker] ddl_on group=%s", group_id)
         yield event.plain_result(f"已开启 DDL，group_id={group_id}")
 
-    @filter.command("ddl_off")
     async def ddl_off(self, event: AstrMessageEvent):
         group_id = self._get_group_id(event)
         if not group_id:
@@ -38,7 +36,6 @@ class CommandsMixin:
         logger.info("[ddl_tracker] ddl_off group=%s", group_id)
         yield event.plain_result(f"已关闭 DDL，group_id={group_id}")
 
-    @filter.command("ddl_status")
     async def ddl_status(self, event: AstrMessageEvent):
         group_id = self._get_group_id(event)
         if not group_id:
@@ -59,6 +56,7 @@ class CommandsMixin:
         status_text = "开启" if enabled else "关闭"
         auto_text = "开启" if self._auto_extract_enabled() else "关闭"
         remind_text = "开启" if self._auto_remind_enabled() else "关闭"
+        auto_create_text = "开启" if self._auto_create_future_tasks_enabled() else "关闭"
         yield event.plain_result(
             f"当前群 DDL 状态：{status_text}\n"
             f"group_id={group_id}\n"
@@ -69,19 +67,18 @@ class CommandsMixin:
             f"自动整理={auto_text}\n"
             f"自动整理周期={self._auto_extract_interval_minutes()} 分钟\n"
             f"自动提醒={remind_text}\n"
+            f"自动创建官方任务={auto_create_text}\n"
             f"提醒提前={self._remind_before_minutes()} 分钟\n"
-            f"提醒后端=主 Agent future_task\n"
+            f"提醒后端=官方 cron_manager/future_task\n"
             f"上次整理时间={last_extract_at}\n"
             f"手动整理命令=/ddl_extract [分钟]\n"
             f"最近截止命令=/ddl_nearest [数量]"
         )
 
-    @filter.command("ddl_extract")
     async def ddl_extract(self, event: AstrMessageEvent):
         async for result in self._handle_extract_command(event, command_name="/ddl_extract"):
             yield result
 
-    @filter.command("ddl_nearest")
     async def ddl_nearest(self, event: AstrMessageEvent):
         group_id = self._get_group_id(event)
         if not group_id:
@@ -109,7 +106,6 @@ class CommandsMixin:
             )
         yield event.plain_result("\n".join(lines))
 
-    @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
     async def on_group_message(self, event: AstrMessageEvent):
         group_id = self._get_group_id(event)
         if not group_id:
@@ -128,8 +124,10 @@ class CommandsMixin:
             return
 
         reminder_rule = self._extract_reminder_rule_from_text(message_text)
+        captured_reminder_rule = False
         if reminder_rule:
             self._upsert_reminder_rule(group_state, reminder_rule)
+            captured_reminder_rule = True
             from astrbot.api import logger
 
             logger.info(
@@ -151,6 +149,19 @@ class CommandsMixin:
             del messages[:-MAX_MESSAGES_PER_GROUP]
         self.state[group_id] = group_state
         self._persist()
+        if captured_reminder_rule:
+            from astrbot.api import logger
+
+            sync_result = await self._sync_pending_future_tasks(
+                group_id=group_id,
+                group_state=group_state,
+                source="rule",
+            )
+            logger.info(
+                "[ddl_tracker] rule future_task sync group=%s result=%s",
+                group_id,
+                json.dumps(sync_result, ensure_ascii=False),
+            )
 
     async def _handle_extract_command(self, event: AstrMessageEvent, command_name: str):
         group_id = self._get_group_id(event)
@@ -184,6 +195,7 @@ class CommandsMixin:
             "added_count": result.get("added_count", 0),
             "updated_count": result.get("updated_count", 0),
             "ddl_total_count": len(self.state.get(group_id, {}).get("ddl_items", [])),
+            "future_task_sync_result": result.get("future_task_sync_result", {}),
             "parsed_result": result.get("parsed_result", {}),
             "raw_result": result.get("raw_result", ""),
         }
@@ -193,9 +205,15 @@ class CommandsMixin:
             "[ddl_tracker] manual extract payload=%s",
             json.dumps(payload, ensure_ascii=False),
         )
+        sync_result = payload.get("future_task_sync_result") or {}
+        sync_text = ""
+        if sync_result.get("ok") and sync_result.get("created_count", 0) > 0:
+            sync_text = f"，自动创建官方提醒 {sync_result.get('created_count', 0)} 条"
+        elif sync_result.get("failed_count", 0) > 0:
+            sync_text = f"，官方提醒创建失败 {sync_result.get('failed_count', 0)} 条"
         yield event.plain_result(
             f"手动整理完成：提取 {payload['extracted_count']} 条，"
-            f"新增 {payload['added_count']} 条，更新 {payload['updated_count']} 条。"
+            f"新增 {payload['added_count']} 条，更新 {payload['updated_count']} 条{sync_text}。"
         )
 
     def _get_group_id(self, event: AstrMessageEvent) -> str:

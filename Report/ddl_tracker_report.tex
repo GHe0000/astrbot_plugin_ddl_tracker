@@ -1,0 +1,27 @@
+\documentclass[aspectratio=169]{ctexbeamer}
+
+\makeatletter
+\def\input@path{{Pic/Ep/}}
+\makeatother
+
+\input{pkgs.tex}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\input{global.tex}
+
+\author{GuotaoHe}
+\title{DDL Tracker}
+\subtitle{面向 Q 群通知过载的日程提醒自动化}
+\date{2026 年 6 月}
+
+\graphicspath{{Pic/Pic/}{Pic/Ep/imgs/}}
+
+\linespread{1.2}
+\usetheme{Simple}
+\useoutertheme[subsection=false]{smoothbars}
+%\useoutertheme[subsection=false]{miniframes}
+%\useoutertheme{sidebar}
+
+\begin{document}
+    \input{ddl_tracker_content.tex}
+\end{document}

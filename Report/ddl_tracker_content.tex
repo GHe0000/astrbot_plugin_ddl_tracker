@@ -1,0 +1,287 @@
+\frame{\titlepage}
+\frame{\frametitle{目录}\tableofcontents}
+
+\section{问题与目标}
+
+\begin{frame}
+  \frametitle{待解决问题：Q 群通知过多}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{现实痛点}
+        \begin{itemize}
+          \item Q 群里课程、考试、报名、作业通知混在一起，DDL 容易被刷走。
+          \item DDL 表达不统一：绝对时间、相对时间、口语化提醒规则同时存在。
+          \item 手动从聊天切到日历创建提醒，步骤多、打断强、容易漏。
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{noteBlock}
+        目标是把“看到一条群消息”变成“可追踪、可提醒、可恢复的日程任务”。
+      \end{noteBlock}
+      \vspace{0.25cm}
+      \begin{itemize}
+        \item 通过用户手动转发消息给 Agent，降低创建日程的交互成本。
+        \item 通过 AstrBot FutureTask 创建一次性 cron 提醒。
+        \item 通过插件状态记录避免重复创建和重启丢失。
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{设计逻辑：从消息到提醒}
+  \begin{center}
+  \begin{tikzpicture}[node distance=0.58cm, >=Latex, font=\small]
+    \tikzstyle{nodebox}=[draw=black!25, fill=black!4, rounded corners=2pt, minimum width=2.35cm, minimum height=0.85cm, align=center]
+    \node[nodebox] (a) {群消息\\手动转发};
+    \node[nodebox, right=of a] (b) {消息缓存\\状态存储};
+    \node[nodebox, right=of b] (c) {LLM 提取\\JSON 输出};
+    \node[nodebox, right=of c] (d) {规则匹配\\提醒时间};
+    \node[nodebox, right=of d] (e) {FutureTask\\cron};
+    \draw[-Latex, thick] (a) -- (b);
+    \draw[-Latex, thick] (b) -- (c);
+    \draw[-Latex, thick] (c) -- (d);
+    \draw[-Latex, thick] (d) -- (e);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.45cm}
+  \begin{columns}[T]
+    \begin{column}{0.32\textwidth}
+      \alert{可识别}\\
+      从自然语言里提取标题、类型、截止时间、原始文本。
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \alert{可去重}\\
+      用标题和时间生成指纹，避免相同 DDL 反复创建任务。
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \alert{可回写}\\
+      FutureTask 创建后把任务名写回 DDL 状态，支持查询和恢复。
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{实现过程}
+
+\begin{frame}
+  \frametitle{技术栈与开发框架}
+  \begin{columns}[T]
+    \begin{column}{0.32\textwidth}
+      \begin{block}{运行栈}
+        \begin{itemize}
+          \item Python 3.10+
+          \item AstrBot Plugin API
+          \item OneBot / aiocqhttp
+          \item FutureTask
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{block}{AI 与数据}
+        \begin{itemize}
+          \item LLM Provider
+          \item Function Calling
+          \item JSON 状态文件
+          \item 指纹去重
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{block}{开发工具}
+        \begin{itemize}
+          \item opencode
+          \item Codex
+          \item PowerShell
+          \item XeLaTeX / Beamer
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.25cm}
+  \begin{quoteBlock}
+    插件入口只负责组合 Mixin 与注册命令；业务逻辑按职责拆分，便于持续扩展和维护。
+  \end{quoteBlock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{主要运行思路：后台扫描与任务同步}
+  \begin{center}
+  \begin{tikzpicture}[node distance=0.42cm, >=Latex, font=\scriptsize]
+    \tikzstyle{box}=[draw=black!25, fill=black!4, rounded corners=2pt, minimum width=2.05cm, minimum height=0.78cm, align=center]
+    \node[box] (m) {消息缓存};
+    \node[box, right=of m] (loop) {定时扫描};
+    \node[box, right=of loop] (llm) {LLM 提取};
+    \node[box, right=of llm] (merge) {合并去重};
+    \node[box, right=of merge] (plan) {提醒计划};
+    \node[box, below=0.95cm of plan] (pending) {pending tasks};
+    \node[box, left=of pending] (future) {FutureTask};
+    \node[box, left=of future] (mark) {状态回写};
+
+    \draw[-Latex, thick] (m) -- (loop);
+    \draw[-Latex, thick] (loop) -- (llm);
+    \draw[-Latex, thick] (llm) -- (merge);
+    \draw[-Latex, thick] (merge) -- (plan);
+    \draw[-Latex, thick] (plan) -- (pending);
+    \draw[-Latex, thick] (pending) -- (future);
+    \draw[-Latex, thick] (future) -- (mark);
+  \end{tikzpicture}
+  \end{center}
+  \begin{itemize}
+    \item 当前主 Agent 工具链已能自动同步 FutureTask。
+    \item 后台扫描负责生成 pending 状态，提醒任务由 FutureTask 统一调度。
+    \item 失败时保留 pending 状态，下次扫描继续重试，避免任务丢失。
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{组件图：插件内外协作}
+  \begin{center}
+  \resizebox{0.96\textwidth}{!}{%
+  \begin{tikzpicture}[node distance=0.55cm, >=Latex, font=\scriptsize]
+    \tikzstyle{box}=[draw=black!25, fill=black!4, rounded corners=2pt, minimum width=2.3cm, minimum height=0.75cm, align=center]
+    \node[box] (user) {用户 / Q 群};
+    \node[box, right=of user] (forward) {手动转发\\OneBot};
+    \node[box, right=of forward] (event) {AstrBot\\EventBus};
+    \node[box, right=of event] (plugin) {DDL Tracker};
+    \node[box, above=0.85cm of plugin] (llm) {LLM Provider};
+    \node[box, below=0.85cm of plugin] (state) {ddl\_groups.json};
+    \node[box, right=of plugin] (future) {FutureTask};
+    \node[box, right=of future] (notice) {群内提醒};
+
+    \draw[-Latex, thick] (user) -- (forward);
+    \draw[-Latex, thick] (forward) -- (event);
+    \draw[-Latex, thick] (event) -- (plugin);
+    \draw[-Latex, thick] (plugin) -- (llm);
+    \draw[-Latex, thick] (llm) -- (plugin);
+    \draw[-Latex, thick] (plugin) -- (state);
+    \draw[-Latex, thick] (plugin) -- (future);
+    \draw[-Latex, thick] (future) -- (notice);
+    \draw[-Latex, thick]
+      (notice.south) -- ++(0,-1.05) -| (user.south);
+  \end{tikzpicture}}
+  \end{center}
+  \vspace{0.2cm}
+  \begin{noteBlock}
+    插件负责识别、去重、计划与状态；LLM 负责语义结构化；FutureTask 负责可靠调度。
+  \end{noteBlock}
+\end{frame}
+
+\section{接口与成果}
+
+\begin{frame}
+  \frametitle{用户接口与 AI 接口}
+  \small
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \begin{block}{用户接口}
+        \begin{itemize}\setlength{\itemsep}{1pt}
+          \item \texttt{/ddl\_on}: 开启群 DDL 跟踪。
+          \item \texttt{/ddl\_extract}: 手动整理最近消息。
+          \item \texttt{/ddl\_status}: 查看 DDL、规则、任务状态。
+          \item \texttt{/ddl\_nearest}: 查看最近截止事项。
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.51\textwidth}
+      \begin{block}{AI Function Calling}
+        \begin{itemize}\setlength{\itemsep}{1pt}
+          \item \texttt{ddl\_extract\_recent\_messages}
+          \item \texttt{ddl\_set\_type\_reminder}
+          \item \texttt{ddl\_get\_pending\_future\_tasks}
+          \item \texttt{ddl\_mark\_future\_task\_created}
+          \item \texttt{future\_task}
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.05cm}
+  \begin{noteBlock}
+    \scriptsize pending 任务携带 \texttt{future\_task\_arguments}；创建成功后用 \texttt{mark\_created\_arguments} 回写绑定状态。
+  \end{noteBlock}
+\end{frame}
+
+\begin{frame}
+  \frametitle{运行设备展示：刷成 Debian 的平板}
+  \begin{columns}[c]
+    \begin{column}{0.62\textwidth}
+      \includegraphics[width=\linewidth]{Debian.jpg}
+    \end{column}
+    \begin{column}{0.34\textwidth}
+      \begin{block}{部署环境}
+        \begin{itemize}
+          \item Debian GNU/Linux
+          \item AArch64 平板设备
+          \item AstrBot 常驻运行
+          \item QQ / OneBot 接入群消息
+        \end{itemize}
+      \end{block}
+      \begin{noteBlock}
+        低功耗设备常驻后台，适合承担群消息监听与提醒调度。
+      \end{noteBlock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{成果展示}
+  \begin{center}
+  \resizebox{0.95\textwidth}{!}{%
+  \begin{tikzpicture}[node distance=0.8cm, >=Latex, font=\small]
+    \tikzstyle{box}=[draw=black!25, fill=black!4, rounded corners=2pt, minimum width=3.8cm, minimum height=3.0cm, align=left, inner xsep=8pt]
+    \node[box] (msg) {
+      \textbf{群消息}\\[0.2cm]
+      六级 2026-06-13 15:00\\
+      作业提前 1 天提醒\\
+      \texttt{/ddl\_extract}
+    };
+    \node[box, right=of msg] (ddl) {
+      \textbf{DDL Tracker}\\[0.2cm]
+      title: 六级考试\\
+      type: 考试\\
+      deadline: 2026-06-13 15:00\\
+      remind: 2026-06-12 15:00
+    };
+    \node[box, right=of ddl] (task) {
+      \textbf{FutureTask}\\[0.2cm]
+      action: create\\
+      run\_once: true\\
+      run\_at: 2026-06-12 15:00\\
+      name: ddl\_tracker\_...
+    };
+    \draw[-Latex, thick] (msg) -- (ddl);
+    \draw[-Latex, thick] (ddl) -- (task);
+  \end{tikzpicture}}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{项目地址与阶段成果}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{block}{项目地址}
+        \texttt{github.com/GHe0000}\\
+        \texttt{/astrbot\_plugin\_ddl\_tracker}
+      \end{block}
+      \begin{block}{已完成}
+        \begin{itemize}
+          \item 群消息记录、DDL 提取、去重与状态持久化。
+          \item 分类提醒规则与 FutureTask 待创建计划。
+          \item 主 Agent 工具链自动同步 \texttt{future\_task}。
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \begin{block}{下一步}
+        \begin{itemize}
+          \item 增加失败重试和状态页。
+          \item 优化分类提醒规则。
+          \item 完善部署文档与演示脚本。
+        \end{itemize}
+      \end{block}
+      \begin{quoteBlock}
+        让“群消息提醒”变成自动化日程，而不是手动整理工作。
+      \end{quoteBlock}
+    \end{column}
+  \end{columns}
+\end{frame}

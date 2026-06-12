@@ -1,0 +1,21 @@
+\frametitle{An Algorithm For Finding Primes Numbers.}
+    \scriptsize
+    \begin{verbatim}
+        int main (void)
+        {
+            std::vector<bool> is_prime (100, true);
+            for (int i = 2; i < 100; i++)
+            if (is_prime[i])
+            {
+                std::cout << i << " ";
+                for (int j = i; j < 100; is_prime [j] = false, j+=i);
+            }
+            return 0;
+        }
+    \end{verbatim}
+
+    \vspace{-0.7cm}
+
+    \begin{uncoverenv}
+    Note the use of \verb|\alert|.
+    \end{uncoverenv}

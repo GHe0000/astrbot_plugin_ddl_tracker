@@ -1,5 +1,5 @@
-from constants import DEFAULT_EXTRACT_PROMPT, DEFAULT_REMIND_BEFORE_MINUTES, DEFAULT_AUTO_EXTRACT_INTERVAL_MINUTES
-from utils import safe_int
+from .constants import DEFAULT_EXTRACT_PROMPT, DEFAULT_REMIND_BEFORE_MINUTES, DEFAULT_AUTO_EXTRACT_INTERVAL_MINUTES
+from .utils import safe_int
 
 
 class ConfigMixin:
@@ -8,6 +8,9 @@ class ConfigMixin:
 
     def _auto_remind_enabled(self) -> bool:
         return bool(self.config.get("auto_remind_enabled", True))
+
+    def _auto_create_future_tasks_enabled(self) -> bool:
+        return bool(self.config.get("auto_create_future_tasks", True))
 
     def _remind_before_minutes(self) -> int:
         return safe_int(
@@ -36,6 +39,7 @@ class ConfigMixin:
             "auto_extract_enabled": self._auto_extract_enabled(),
             "auto_extract_interval_minutes": self._auto_extract_interval_minutes(),
             "auto_remind_enabled": self._auto_remind_enabled(),
+            "auto_create_future_tasks": self._auto_create_future_tasks_enabled(),
             "remind_before_minutes": self._remind_before_minutes(),
             "extract_prompt": self._extract_prompt(),
         }

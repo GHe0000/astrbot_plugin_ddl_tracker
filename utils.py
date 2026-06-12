@@ -47,20 +47,48 @@ def format_ts(timestamp: int) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def format_run_at(timestamp: int) -> str:
+    ts = safe_int(timestamp, default=0, minimum=0)
+    if ts <= 0:
+        return ""
+    return datetime.fromtimestamp(ts).astimezone().replace(microsecond=0).isoformat()
+
+
 def build_fingerprint(item: dict) -> str:
     normalized_deadline = item.get("normalized_deadline") or item.get("deadline_text") or ""
+    deadline_ts = parse_deadline_ts(str(normalized_deadline))
+    deadline_key = (
+        datetime.fromtimestamp(deadline_ts).strftime("%Y-%m-%d %H:%M")
+        if deadline_ts > 0
+        else str(normalized_deadline).strip().lower()
+    )
     raw = "|".join(
         [
-            str(item.get("type") or "").strip().lower(),
-            str(item.get("title") or "").strip().lower(),
-            str(normalized_deadline).strip().lower(),
+            normalize_match_text(item.get("title")),
+            deadline_key,
         ]
     )
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 
 def parse_deadline_ts(deadline_text: str) -> int:
-    raw = str(deadline_text or "").strip().replace("/", "-").replace("T", " ")
+    raw = (
+        str(deadline_text or "")
+        .strip()
+        .replace("/", "-")
+        .replace("T", " ")
+        .replace("年", "-")
+        .replace("月", "-")
+        .replace("日", " ")
+        .replace("号", " ")
+        .replace("：", ":")
+    )
+    raw = re.sub(
+        r"(\d{1,2})[点时](\d{1,2})?(?:分)?",
+        lambda match: f"{match.group(1)}:{match.group(2) or '00'}",
+        raw,
+    )
+    raw = re.sub(r"\s+", " ", raw).strip().strip("-")
     if not raw:
         return 0
 
@@ -140,6 +168,8 @@ def apply_period_to_hour(hour: int, period_text: str) -> int:
 
 def normalize_type_keyword(raw_text: str) -> str:
     text = str(raw_text or "").strip()
+    text = re.sub(r"^(?:这?两个|两个|所有|全部|这些|那些|把)", "", text)
+    text = re.sub(r"(?:修改为|改为|设置为|设为|改成|调整为|在)$", "", text)
     text = re.sub(r"(类|事项|任务|ddl)$", "", text, flags=re.IGNORECASE)
     return text.strip()
 

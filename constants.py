@@ -5,7 +5,7 @@ MAX_MESSAGES_PER_GROUP = 500
 DEFAULT_AUTO_EXTRACT_INTERVAL_MINUTES = 30
 DEFAULT_REMIND_BEFORE_MINUTES = 60
 AUTO_LOOP_TICK_SECONDS = 15
-COMMAND_NAMES = {"/ddl_on", "/ddl_off", "/ddl_status", "/ddl_extract", "/ddl_nearest"}
+COMMAND_NAMES = {"ddl_on", "ddl_off", "ddl_status", "ddl_extract", "ddl_nearest"}
 DEFAULT_EXTRACT_PROMPT = """
 你是一个负责提取群聊中 DDL 的助手。
 请从群消息里识别明确提到的作业、考试、实验、报告、报名、提交截止等事项。

@@ -1,0 +1,5 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{“科文之争”}{3}{0}{1}
+\beamer@sectionintoc {2}{科幻给文学带来了什么}{5}{0}{2}
+\beamer@sectionintoc {3}{科幻与科学}{13}{0}{3}
+\beamer@sectionintoc {4}{尾声}{18}{0}{4}

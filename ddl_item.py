@@ -1,7 +1,7 @@
 from time import time
 
-from constants import MAX_MESSAGES_PER_GROUP, COMMAND_NAMES
-from utils import safe_int, format_ts, build_fingerprint, parse_deadline_ts, format_remaining
+from .constants import COMMAND_NAMES
+from .utils import safe_int, format_ts, build_fingerprint, parse_deadline_ts, format_remaining
 
 
 class DDLItemMixin:
@@ -19,6 +19,11 @@ class DDLItemMixin:
         }
         if not normalized["title"]:
             return None
+        deadline_text = normalized["normalized_deadline"] or normalized["deadline_text"]
+        if not deadline_text or deadline_text.lower() in {"none", "null", "unknown"}:
+            return None
+        if deadline_text in {"未指定", "未知", "不明", "不明确", "无"}:
+            return None
         return normalized
 
     def _item_deadline_ts(self, item: dict) -> int:
@@ -35,11 +40,16 @@ class DDLItemMixin:
 
     def _merge_ddl_items(self, group_state: dict, parsed_result: dict) -> tuple[int, int]:
         existing_items = group_state.setdefault("ddl_items", [])
-        existing_by_fp = {
-            str(item.get("fingerprint") or ""): item
-            for item in existing_items
-            if str(item.get("fingerprint") or "")
-        }
+        existing_by_fp = {}
+        for item in existing_items:
+            if not isinstance(item, dict):
+                continue
+            stored_fp = str(item.get("fingerprint") or "")
+            if stored_fp:
+                existing_by_fp.setdefault(stored_fp, item)
+            canonical_fp = build_fingerprint(item)
+            if canonical_fp:
+                existing_by_fp.setdefault(canonical_fp, item)
         added_count = 0
         updated_count = 0
 
@@ -49,7 +59,7 @@ class DDLItemMixin:
                 continue
 
             deadline_ts = self._item_deadline_ts(item)
-            if deadline_ts > 0 and deadline_ts <= int(time()):
+            if deadline_ts <= 0 or deadline_ts <= int(time()):
                 continue
 
             fingerprint = build_fingerprint(item)
@@ -64,6 +74,8 @@ class DDLItemMixin:
                 item["last_reminded_deadline_ts"] = 0
                 item["last_reminded_key"] = ""
                 item["future_task_name"] = ""
+                item["future_task_actual_name"] = ""
+                item["future_task_job_id"] = ""
                 item["future_task_remind_key"] = ""
                 item["future_task_remind_ts"] = 0
                 item["future_task_recorded_at"] = 0
@@ -79,12 +91,15 @@ class DDLItemMixin:
                 if new_value and (not old_value or len(str(new_value)) >= len(str(old_value))):
                     merged[key] = new_value
             merged_deadline_ts = self._item_deadline_ts(merged)
+            merged["fingerprint"] = fingerprint
             merged["deadline_ts"] = merged_deadline_ts
             if safe_int(merged.get("last_reminded_deadline_ts"), default=0, minimum=0) != merged_deadline_ts:
                 merged["last_reminded_at"] = 0
                 merged["last_reminded_deadline_ts"] = 0
                 merged["last_reminded_key"] = ""
             merged.setdefault("future_task_name", "")
+            merged.setdefault("future_task_actual_name", "")
+            merged.setdefault("future_task_job_id", "")
             merged.setdefault("future_task_remind_key", "")
             merged.setdefault("future_task_remind_ts", 0)
             merged.setdefault("future_task_recorded_at", 0)
@@ -169,4 +184,5 @@ class DDLItemMixin:
         message = str(raw_message or "").strip()
         if not message:
             return False
-        return message.split()[0].lower() in COMMAND_NAMES
+        first_token = message.split()[0].lower().lstrip("/")
+        return first_token in COMMAND_NAMES

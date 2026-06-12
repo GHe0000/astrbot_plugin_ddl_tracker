@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from time import time
 
-from utils import safe_int, normalize_type_keyword, normalize_match_text, parse_number_token, apply_period_to_hour
+from .utils import safe_int, normalize_type_keyword, normalize_match_text, parse_number_token, apply_period_to_hour
 
 
 class ReminderRulesMixin:
@@ -12,6 +12,7 @@ class ReminderRulesMixin:
             return None
 
         compact = re.sub(r"\s+", "", message)
+        compact = compact.replace("的", "")
         if "提醒" not in compact and "通知" not in compact:
             return None
 
@@ -30,7 +31,7 @@ class ReminderRulesMixin:
             )
 
         fixed_match = re.search(
-            r"(?P<ddl_type>[\u4e00-\u9fa5A-Za-z0-9]{1,20})(?:类)?(?:DDL)?(?:都|统一|全部)?"
+            r"(?P<ddl_type>[\u4e00-\u9fa5A-Za-z0-9]{1,20})(?:类)?(?:DDL)?(?:都|统一|全部)?(?:在)?"
             r"(?:(?:前(?P<days>[0-9零一二两三四五六七八九十]+)天)|(?P<one_day>前一天)|(?P<same_day>当天))"
             r"(?P<period>凌晨|早上|上午|中午|下午|晚上)?"
             r"(?P<hour>[0-9]{1,2})"

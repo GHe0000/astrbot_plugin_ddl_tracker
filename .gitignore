@@ -191,6 +191,9 @@ cython_debug/
 # Ruff stuff:
 .ruff_cache/
 
+# AstrBot plugin runtime state
+ddl_groups.json
+
 # PyPI configuration file
 .pypirc
 
@@ -205,3 +208,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Report
+Report/S

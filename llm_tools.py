@@ -1,15 +1,16 @@
 import json
-from time import time
 
-from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.event import AstrMessageEvent
 
-from utils import safe_int, format_ts
+from .utils import safe_int
 
 
 class LLMToolsMixin:
-    @filter.llm_tool(name="ddl_extract_recent_messages")
     async def ddl_extract_recent_messages_tool(self, event: AstrMessageEvent, minutes: int = 0):
         '''整理最近一段时间的群消息并提取 DDL。
+
+        如果返回 pending_future_task_count > 0，主 Agent 必须继续调用官方 future_task
+        创建每一条 pending_future_tasks，并在创建成功后调用 ddl_mark_future_task_created。
 
         Args:
             minutes(number): 要整理最近多少分钟的消息；填 0 时使用插件默认自动整理周期。
@@ -22,13 +23,20 @@ class LLMToolsMixin:
         if not bool(group_state.get("enabled", False)):
             return json.dumps({"ok": False, "reason": "当前群尚未开启 DDL"}, ensure_ascii=False)
 
-        lookback_minutes = safe_int(minutes, default=self._auto_extract_interval_minutes(), minimum=1)
+        requested_minutes = safe_int(minutes, default=0, minimum=0)
+        lookback_minutes = requested_minutes or self._auto_extract_interval_minutes()
         result = await self._extract_group_ddls(
             group_id=group_id,
             group_state=group_state,
             unified_msg_origin=str(event.unified_msg_origin or group_state.get("unified_msg_origin") or ""),
             lookback_minutes=lookback_minutes,
             source="tool",
+        )
+        group_state = self.state.get(group_id, group_state)
+        pending_future_tasks = self._get_pending_future_tasks(
+            group_id=group_id,
+            group_state=group_state,
+            limit=20,
         )
         payload = {
             "ok": True,
@@ -40,10 +48,13 @@ class LLMToolsMixin:
             "added_count": result.get("added_count", 0),
             "updated_count": result.get("updated_count", 0),
             "ddl_total_count": len(self.state.get(group_id, {}).get("ddl_items", [])),
+            "future_task_sync_result": result.get("future_task_sync_result", {}),
+            "pending_future_task_count": len(pending_future_tasks),
+            "pending_future_tasks": pending_future_tasks,
+            "future_task_sync": self._build_future_task_sync_instruction(pending_future_tasks),
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_get_remaining")
     async def ddl_get_remaining_tool(self, event: AstrMessageEvent, limit: int = 10):
         '''查看当前群尚未截止的 DDL。
 
@@ -64,7 +75,6 @@ class LLMToolsMixin:
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_get_due_within")
     async def ddl_get_due_within_tool(self, event: AstrMessageEvent, hours: int = 24):
         '''查看指定时间范围内即将截止的 DDL。
 
@@ -86,9 +96,11 @@ class LLMToolsMixin:
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_set_type_reminder")
     async def ddl_set_type_reminder_tool(self, event: AstrMessageEvent, ddl_type: str, rule_text: str):
         '''为某一类 DDL 设置提醒规则。
+
+        如果返回 pending_future_task_count > 0，主 Agent 必须继续调用官方 future_task
+        创建每一条 pending_future_tasks，并在创建成功后调用 ddl_mark_future_task_created。
 
         Args:
             ddl_type(string): DDL 类型关键词，例如作业、考试、讲座报告。
@@ -113,17 +125,27 @@ class LLMToolsMixin:
         self._upsert_reminder_rule(group_state, rule)
         self.state[group_id] = group_state
         self._persist()
+        sync_result = await self._sync_pending_future_tasks(
+            group_id=group_id,
+            group_state=group_state,
+            source="tool_rule",
+        )
+        pending_future_tasks = self._get_pending_future_tasks(
+            group_id=group_id,
+            group_state=group_state,
+            limit=20,
+        )
         payload = {
             "ok": True,
             "group_id": group_id,
             "rule": self._serialize_reminder_rule(rule),
-            "pending_future_task_count": len(
-                self._get_pending_future_tasks(group_id, group_state, limit=9999)
-            ),
+            "future_task_sync_result": sync_result,
+            "pending_future_task_count": len(pending_future_tasks),
+            "pending_future_tasks": pending_future_tasks,
+            "future_task_sync": self._build_future_task_sync_instruction(pending_future_tasks),
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_get_reminder_rules")
     async def ddl_get_reminder_rules_tool(self, event: AstrMessageEvent):
         '''查看当前群已生效的分类提醒规则。'''
         group_id = self._get_group_id(event)
@@ -140,9 +162,11 @@ class LLMToolsMixin:
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_get_pending_future_tasks")
     async def ddl_get_pending_future_tasks_tool(self, event: AstrMessageEvent, limit: int = 20):
         '''获取当前群需要由主 Agent 创建的官方 FutureTask 提醒计划。
+
+        如果返回 count > 0，主 Agent 必须继续调用官方 future_task 创建每一条 items，
+        并在创建成功后调用 ddl_mark_future_task_created。
 
         Args:
             limit(number): 最多返回多少个待创建的提醒任务。
@@ -170,10 +194,11 @@ class LLMToolsMixin:
             "group_id": group_id,
             "count": len(items),
             "items": items,
+            "pending_future_tasks": items,
+            "future_task_sync": self._build_future_task_sync_instruction(items),
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    @filter.llm_tool(name="ddl_mark_future_task_created")
     async def ddl_mark_future_task_created_tool(
         self,
         event: AstrMessageEvent,
@@ -197,8 +222,8 @@ class LLMToolsMixin:
             return json.dumps({"ok": False, "reason": "当前群尚未开启 DDL"}, ensure_ascii=False)
         fingerprint_text = str(fingerprint or "").strip()
         remind_key_text = str(remind_key or "").strip()
-        task_name_text = str(task_name or "").strip()
-        if not fingerprint_text or not remind_key_text or not task_name_text:
+        actual_task_name = str(task_name or "").strip()
+        if not fingerprint_text or not remind_key_text or not actual_task_name:
             return json.dumps(
                 {"ok": False, "reason": "fingerprint、remind_key、task_name 不能为空"},
                 ensure_ascii=False,
@@ -210,33 +235,29 @@ class LLMToolsMixin:
             if str(item.get("fingerprint") or "").strip() != fingerprint_text:
                 continue
 
-            deadline_ts = self._item_deadline_ts(item)
-            remind_plan = self._get_item_remind_plan(group_state, item, deadline_ts)
-            current_remind_key = str(remind_plan.get("remind_key") or "")
-            current_remind_ts = safe_int(remind_plan.get("remind_ts"), default=0, minimum=0)
-            if current_remind_key != remind_key_text:
+            record_result = self._record_future_task_created(
+                group_state=group_state,
+                group_id=group_id,
+                fingerprint=fingerprint_text,
+                remind_key=remind_key_text,
+                actual_task_name=actual_task_name,
+            )
+            if not record_result.get("ok"):
                 payload = {
                     "ok": False,
-                    "reason": "当前 DDL 的提醒计划已变化，请重新获取待创建任务",
                     "group_id": group_id,
                     "fingerprint": fingerprint_text,
-                    "current_remind_key": current_remind_key,
-                    "requested_remind_key": remind_key_text,
+                    **record_result,
                 }
                 return json.dumps(payload, ensure_ascii=False)
 
-            item["future_task_name"] = task_name_text
-            item["future_task_remind_key"] = current_remind_key
-            item["future_task_remind_ts"] = current_remind_ts
-            item["future_task_recorded_at"] = int(time())
             self.state[group_id] = group_state
             self._persist()
             payload = {
                 "ok": True,
                 "group_id": group_id,
                 "fingerprint": fingerprint_text,
-                "task_name": task_name_text,
-                "remind_at": format_ts(current_remind_ts),
+                **record_result,
             }
             return json.dumps(payload, ensure_ascii=False)
 

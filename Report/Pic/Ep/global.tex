@@ -1,0 +1,68 @@
+\author{何国涛}
+\title{姓“科”还是姓“文”}
+\subtitle{浅谈科幻与文学和科幻与科学}
+\date{\zhtoday}
+
+\AtBeginSection[]{
+    \frame{\frametitle{目录}\tableofcontents[currentsection, 
+    subsectionstyle=show/show/shaded]}
+}
+
+% 定义框
+
+% 定理环境
+% Black theorem number and optional black title padding above and below
+\newtheoremstyle{boxthmstyle} % Theorem style name
+{0pt} % Space above
+{0pt} % Space below
+{\itshape} % Body font
+{} % Indent amount
+{\bfseries} % Theorem head font
+{.} % Punctuation after theorem head
+{0.25em} % Space after theorem head
+{}
+
+\RequirePackage{pifont,mdframed}
+
+
+\definecolor{Green}{rgb}{0,1,0}
+
+% 背景设置
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=beamer@simple@color, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=beamer@simple@color!5, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{quoteBlock}
+
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=mygrey, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=mygrey!10!white, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{noteBlock}
+
+\theoremstyle{boxthmstyle}
+%\newenvironment{quote}{\begin{quoteBlock}}{\end{quoteBlock}}

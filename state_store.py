@@ -1,6 +1,6 @@
 from time import time
 
-from constants import STATE_FILE
+from .constants import STATE_FILE
 
 
 class StateMixin:
@@ -89,6 +89,12 @@ class StateMixin:
             if "future_task_name" not in item:
                 item["future_task_name"] = ""
                 changed = True
+            if "future_task_actual_name" not in item:
+                item["future_task_actual_name"] = ""
+                changed = True
+            if "future_task_job_id" not in item:
+                item["future_task_job_id"] = ""
+                changed = True
             if "future_task_remind_key" not in item:
                 item["future_task_remind_key"] = ""
                 changed = True
@@ -118,8 +124,11 @@ class StateMixin:
         kept_items = []
         removed_count = 0
         for item in items:
+            if not isinstance(item, dict):
+                removed_count += 1
+                continue
             deadline_ts = self._item_deadline_ts(item)
-            if deadline_ts > 0 and deadline_ts <= now_ts:
+            if deadline_ts <= 0 or deadline_ts <= now_ts:
                 removed_count += 1
                 continue
             kept_items.append(item)

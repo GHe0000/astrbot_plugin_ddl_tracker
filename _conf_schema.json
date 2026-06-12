@@ -20,7 +20,13 @@
     "description": "是否启用 DDL 提醒计划",
     "type": "bool",
     "default": true,
-    "hint": "开启后，插件会计算每条 DDL 的提醒时间，并提供给主 Agent 使用官方 future_task 工具创建任务。"
+    "hint": "开启后，插件会计算每条 DDL 的提醒时间，并在 LLM Tool 返回中要求主 Agent 自动使用官方 future_task 工具创建任务。"
+  },
+  "auto_create_future_tasks": {
+    "description": "是否后台自动创建官方提醒任务",
+    "type": "bool",
+    "default": true,
+    "hint": "开启后，后台自动整理或规则变更发现待提醒 DDL 时，会直接调用 AstrBot cron_manager 创建官方 future_task 任务。"
   },
   "remind_before_minutes": {
     "description": "提前多少分钟提醒",

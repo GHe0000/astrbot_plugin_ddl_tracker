@@ -2,7 +2,7 @@ import asyncio
 import json
 from time import time
 
-from utils import safe_int, safe_json_loads, format_ts
+from .utils import safe_int, safe_json_loads, format_ts
 
 
 class ExtractionMixin:
@@ -26,7 +26,7 @@ class ExtractionMixin:
                 logger.exception("[ddl_tracker] auto extract loop failed: %s", exc)
 
             try:
-                from constants import AUTO_LOOP_TICK_SECONDS
+                from .constants import AUTO_LOOP_TICK_SECONDS
 
                 await asyncio.sleep(AUTO_LOOP_TICK_SECONDS)
             except asyncio.CancelledError:
@@ -131,6 +131,11 @@ class ExtractionMixin:
                 "parsed_result": parsed_result,
                 "raw_result": raw_result,
             }
+            result["future_task_sync_result"] = await self._sync_pending_future_tasks(
+                group_id=group_id,
+                group_state=group_state,
+                source=source,
+            )
             self._update_extract_meta(group_state, source, result)
             self.state[group_id] = group_state
             self._persist()
@@ -174,6 +179,7 @@ class ExtractionMixin:
             "updated_count": result.get("updated_count", 0),
             "parsed_result": result.get("parsed_result", {}),
             "raw_result": result.get("raw_result", ""),
+            "future_task_sync_result": result.get("future_task_sync_result", {}),
         }
 
     def _build_ai_extract_prompt(self, messages: list[dict]) -> str:
