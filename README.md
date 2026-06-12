@@ -213,6 +213,6 @@ ddl_tracker/
 ## 项目信息
 
 - **作者**: GuotaoHe
-- **版本**: v0.8.4
+- **版本**: v0.8.5
 - **仓库**: https://github.com/GHe0000/astrbot_plugin_ddl_tracker
 - **协议**: 见 LICENSE 文件
