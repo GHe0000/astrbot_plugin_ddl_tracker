@@ -19,9 +19,9 @@ from .commands import CommandsMixin
 
 @register(
     "ddl_tracker",
-    "GuotaoHe",
-    "单文件 DDL 调试插件",
-    "0.8.4",
+    "Guotao He",
+    "DDL Tracker",
+    "0.8.5",
 )
 class DDLTrackerPlugin(
     ConfigMixin,
