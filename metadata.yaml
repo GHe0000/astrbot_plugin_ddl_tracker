@@ -1,6 +1,6 @@
 name: ddl_tracker
 display_name: DDL Tracker Demo
-desc: 最小 DDL 调试插件
-version: v0.8.4
+desc: DDL 插件
+version: v0.8.5
 author: GuotaoHe
 repo: "https://github.com/GHe0000/astrbot_plugin_ddl_tracker"
